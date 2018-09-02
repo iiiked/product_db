@@ -92,6 +92,7 @@ class Table {
                 this.loader.style.display = 'none';
             } else {
                 !this.hasHead && this.appendHead(Object.keys(data[0]));
+                if (data.length < this.firstItemIndex) this.firstItemIndex = 0;
                 for (let i = this.firstItemIndex; i < (this.firstItemIndex + this.itemsPerPage); i++) {
                     if(data[i] === undefined) break;
                     this.insert(data[i]); 
