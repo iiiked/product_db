@@ -113,11 +113,11 @@ class Table {
 
     search(str) {
         this.clear();
-        this.query = str;
+        this.query = str.trim();
         const re = new RegExp(str, 'ig');
         const callback = (obj) => {
             for (let key in obj) {
-                if (key === 'id' && obj[key] == str) return true;
+                if (key === 'id' && obj[key] == this.query) return true;
                 if (key.match(/price/i) !== null) continue;
                 if (key !== 'id' && obj[key].toString().match(re) !== null) return true;
             }
@@ -156,12 +156,14 @@ class Table {
     }
 
     rowClickHandler(e) {
-        const obj = {};
-        const row = e.target.parentElement;
-        for (let i = 0; i < this.colSize; i++) {
-            obj[this.head.firstElementChild.children[i].textContent.replace(' ', '_')] = row.children[i].textContent;
+        if (e.type === 'click' || e.key === 'Enter') {
+            const obj = {};
+            const row = e.type === 'click' ? e.target.parentElement : e.target;
+            for (let i = 0; i < this.colSize; i++) {
+                obj[this.head.firstElementChild.children[i].textContent.replace(' ', '_')] = row.children[i].textContent;
+            }
+            !modal.isOpen ? modal.build(obj) : modal.update(obj);
         }
-        !modal.isOpen ? modal.build(obj) : modal.update(obj);
     }
 
     listen() {
@@ -169,6 +171,7 @@ class Table {
         this.pagePrevBtn.addEventListener('click', this.prevPageHandler);
         this.pageNextBtn.addEventListener('click', this.nextPageHandler);
         this.body.addEventListener('click', this.rowClickHandler);
+        this.body.addEventListener('keydown', this.rowClickHandler);
     }
 
     removeListeners() {
@@ -329,6 +332,7 @@ modal.build = (obj) => {
         modal.isOpen = false;
         modal.closeBtn.removeEventListener('click', modal.kill);
         modal.overlay.removeEventListener('click', modal.overlayClickHandler);
+        document.removeEventListener('keydown', modal.keybordCloseHandler);
     };
     
     // Populate modal table
@@ -340,8 +344,10 @@ modal.build = (obj) => {
     modal.overlayClickHandler = (e) => {
         e.target === modal.overlay && modal.kill();
     };
+    modal.keybordCloseHandler = (e) => e.key === 'Escape' && modal.kill();
     modal.closeBtn.addEventListener('click', modal.kill);
     modal.overlay.addEventListener('click', modal.overlayClickHandler);
+    document.addEventListener('keydown', modal.keybordCloseHandler);
 };
 
 // Create and populate main table
@@ -350,9 +356,14 @@ mainTable.populate();
 mainTable.listen();
 
 // Add event listeners, specific to main table only
-searchBar.btn.addEventListener('click', () => {
+searchBar.btn.addEventListener('click', (e) => {
+    e.preventDefault();
     mainTable.search(searchBar.input.value);
     searchBar.clear();
+});
+
+searchBar.input.addEventListener('keydown', (e) => {
+    e.key === 'Enter' && searchBar.btn.click();
 });
 
 mainTable.resetSearchBtn.addEventListener('click', () => mainTable.resetSearch('All products'));
