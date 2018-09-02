@@ -285,6 +285,7 @@ modal.build = (obj) => {
 
     // Make modal visible
     modal.overlay.style.display = 'block';
+    document.getElementById('app').style.display = 'none';
     modal.isOpen = true;
 
     // Create modal table of similar products
@@ -324,6 +325,7 @@ modal.build = (obj) => {
         modalTable.filter = 0;
         modal.overlay.innerHTML = '';
         modal.overlay.style.display = 'none';
+        document.getElementById('app').style.display = 'block';
         modal.isOpen = false;
         modal.closeBtn.removeEventListener('click', modal.kill);
         modal.overlay.removeEventListener('click', modal.overlayClickHandler);
